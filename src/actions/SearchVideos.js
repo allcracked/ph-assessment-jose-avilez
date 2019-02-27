@@ -9,7 +9,7 @@ const searchVideos = (searchTerm, callback) => {
         maxResult: '5',
     };
 
-    fetch(params.url+'part='+params.part+'&key='+params.key+'&maxResults='+params.maxResult+'&q='+searchTerm+"&type=video"+"&channelId=UC_x5XG1OV2P6uZZ5FSM9Ttw")
+    fetch(params.url+'part='+params.part+'&key='+params.key+'&maxResults='+params.maxResult+'&q='+searchTerm+"&type=video&channelId=UC_x5XG1OV2P6uZZ5FSM9Ttw")
     .then(res => res.json())
     .then(res => {
         if (callback) {

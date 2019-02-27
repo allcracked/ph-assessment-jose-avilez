@@ -4,6 +4,7 @@ import SearchResults from './components/SearchResults';
 import Video from './components/Video';
 import SearchHistory from './components/SearchHistory';
 import Firebase from 'firebase';
+import Moment from 'react-moment';
 
 // Importing the actions
 import SearchVideos from './actions/SearchVideos';
@@ -23,7 +24,8 @@ class App extends Component {
       returnedVideos: [],
       selectedVideo: null,
       user: null,
-      searches: []
+      searches: [],
+      currentTime: new Date().toLocaleString()
     };
 
     this.databaseRef = Firebase.database().ref();
@@ -43,7 +45,22 @@ class App extends Component {
       this.setState({
         user: user,
       });
-      this.getSearchListener();
+      
+      // Look for search history only if the user is authenticated
+      if (this.state.user)
+        this.getSearchListener();
+    });
+
+    this.tickInterval = setInterval(() => this.tickClockHandler(), 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.tickInterval);
+  }
+
+  tickClockHandler = () => {
+    this.setState({
+      currentTime: new Date().toLocaleString()
     });
   }
 
@@ -54,30 +71,36 @@ class App extends Component {
 
   logoutHandler = () => {
     Firebase.auth().signOut();
+
+    // Resetting to the default search and cleaning the result array when logging out
+    SearchVideos('ReactJS', (videos) => {
+      this.setState({
+        searchKey: 'ReactJS',
+        returnedVideos: videos,
+        selectedVideo: videos[0],
+        searches: null
+      })
+    });
   }
 
   searchbarChangeHandler = (event) => {
     const searchingNow = event.target.value;
 
-    if (searchingNow.length < 5) {
-      console.log("The search term is too short.");
-      this.setState({
+    this.setState({
         searchKey: searchingNow,
       });
 
+    if (searchingNow.length < 5) {
+      console.log("The search term is too short.");
     } else {
       console.log("Looking for:", searchingNow);
-
-      /*SearchVideos(searchingNow, (videos) => {
+      
+      SearchVideos(searchingNow, (videos) => {
         this.setState( {
           searchKey: searchingNow,
           returnedVideos: videos,
         });
-      });*/
-
-      this.setState({
-        searchKey: searchingNow,
-      });
+      });      
     }
   }
 
@@ -115,8 +138,8 @@ class App extends Component {
     });
   }
 
-  clickHistoryHandler = (event) => {
-    // TODO: when clicking one of the seach history, it should set that text on the value of the searchbar
+  clickHistoryHandler = (prevSearch) => {
+    this.searchbarChangeHandler({target: {value: prevSearch.searchKey}})
   }
 
   render() {
@@ -126,7 +149,7 @@ class App extends Component {
     if (this.state.user) {
      appView =  (
       <div>
-        <button className="logout__button" onClick={this.logoutHandler}>Logout {this.state.user.displayName} </button>
+        <button className="logout__button" onClick={this.logoutHandler}>Logout {this.state.user.displayName} ({this.state.user.email}) </button>
         <Searchbar 
           search={this.state.searchKey}
           changeHandler={this.searchbarChangeHandler}
@@ -138,7 +161,11 @@ class App extends Component {
           videos={this.state.returnedVideos}
           clickHandler={this.selectVideoHandler} />
 
-        <SearchHistory searches={this.state.searches} />
+        <SearchHistory 
+          searches={this.state.searches}
+          clickHandler={this.clickHistoryHandler} />
+
+        <Moment format="YYYY/MM/DD HH:mm:ss">{this.state.currentTime}</Moment>
       </div>
       );
     } else {

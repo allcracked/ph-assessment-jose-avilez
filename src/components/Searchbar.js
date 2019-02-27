@@ -4,7 +4,7 @@ const searchbar = (props) => {
     return (
         <div className="search__bar">
             <input 
-                defaultValue={props.search} 
+                value={props.search} 
                 onChange={props.changeHandler}
                 type="text"
                 placeholder="Search..." />

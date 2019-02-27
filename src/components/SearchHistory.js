@@ -9,7 +9,7 @@ const searchHistory = (props) => {
     
     const searchesList = props.searches.map(search => {
         return (
-            <li key={search.id} >
+            <li key={search.id} onClick={() => props.clickHandler(search)}>
                 {search.searchKey}
             </li>
         );
