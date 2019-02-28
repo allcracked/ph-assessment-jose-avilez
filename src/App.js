@@ -6,9 +6,13 @@ import SearchHistory from './components/SearchHistory';
 import Firebase from 'firebase';
 import Moment from 'react-moment';
 
-// Importing the actions
-import SearchVideos from './actions/SearchVideos';
-import firebaseConfig from './actions/firebaseConfig';
+import {connect} from 'react-redux';
+
+import * as actionTypes from './actions/reducerActions';
+
+// Importing the utilities
+import SearchVideos from './modules/SearchVideos';
+import firebaseConfig from './modules/firebaseConfig';
 
 import './App.css';
 
@@ -20,34 +24,22 @@ class App extends Component {
     super(props);
 
     this.state = {
-      searchKey: '',
-      returnedVideos: [],
-      selectedVideo: null,
-      user: null,
-      searches: [],
-      currentTime: new Date().toLocaleString()
+      currentTime: Date.now()
     };
 
     this.databaseRef = Firebase.database().ref();
-    
+    this.userInputTimeout = null;
   }
 
   componentDidMount() {
-    SearchVideos('ReactJS', (videos) => {
-      this.setState({
-        searchKey: 'ReactJS',
-        returnedVideos: videos,
-        selectedVideo: videos[0]
-      })
-    });
+    // Loading the application with default search and results
+    this.defaultSearchData();
 
     Firebase.auth().onAuthStateChanged(user => {
-      this.setState({
-        user: user,
-      });
+      this.props.setUser(user);
       
       // Look for search history only if the user is authenticated
-      if (this.state.user)
+      if (this.props.loggedUser)
         this.getSearchListener();
     });
 
@@ -60,7 +52,14 @@ class App extends Component {
 
   tickClockHandler = () => {
     this.setState({
-      currentTime: new Date().toLocaleString()
+      currentTime: Date.now()
+    });
+  }
+
+  defaultSearchData = () => {
+    SearchVideos('ReactJS', (videos) => {
+      console.log(videos[0]);
+      this.props.saveResults('ReactJS', videos, videos[0]);
     });
   }
 
@@ -71,69 +70,54 @@ class App extends Component {
 
   logoutHandler = () => {
     Firebase.auth().signOut();
-
     // Resetting to the default search and cleaning the result array when logging out
-    SearchVideos('ReactJS', (videos) => {
-      this.setState({
-        searchKey: 'ReactJS',
-        returnedVideos: videos,
-        selectedVideo: videos[0],
-        searches: null
-      })
-    });
+    this.defaultSearchData();
   }
 
   searchbarChangeHandler = (event) => {
     const searchingNow = event.target.value;
+    this.props.saveResults(searchingNow);
 
-    this.setState({
-        searchKey: searchingNow,
-      });
+    clearTimeout(this.userInputTimeout);
 
-    if (searchingNow.length < 5) {
-      console.log("The search term is too short.");
-    } else {
-      console.log("Looking for:", searchingNow);
-      
-      SearchVideos(searchingNow, (videos) => {
-        this.setState( {
-          searchKey: searchingNow,
-          returnedVideos: videos,
-        });
-      });      
-    }
+
+    this.userInputTimeout = setTimeout(() => {
+      if (searchingNow.length < 5) {
+        console.log("The search term is too short.");
+      } else {
+        console.log("Looking for:", searchingNow);
+        
+        SearchVideos(searchingNow, (videos) => {
+          this.props.saveResults(searchingNow, videos);
+        });      
+      }
+    }, 1000);
   }
 
   selectVideoHandler = (video) => {
-    this.setState({
-      selectedVideo: video,
-    });
+    this.props.saveResults(null, null, video);
   }
 
   saveSearchHandler = (searchKey) => {
-    console.log("Saving search:", searchKey, "for:", this.state.user.uid);
+    console.log("Saving search:", searchKey, "for:", this.props.loggedUser.uid);
     
     const pushItem = {
-      user: this.state.user.displayName,
+      user: this.props.loggedUser.displayName,
       id: Date.now()+Math.random(),
       timestamp: Date.now(),
       searchKey: searchKey
     }
 
-    this.databaseRef.child('favoriteSearches/'+this.state.user.uid).push(pushItem);
+    this.databaseRef.child('favoriteSearches/'+this.props.loggedUser.uid).push(pushItem);
   }
 
   getSearchListener = () => {
-    this.databaseRef.child('favoriteSearches/'+this.state.user.uid)
+    this.databaseRef.child('favoriteSearches/'+this.props.loggedUser.uid)
     .on('value', searches => {
       if (searches.exists()) {
-        this.setState({
-          searches: Object.values(searches.val()),
-        });
+        this.props.loadHistory(Object.values(searches.val()));
       } else {
-        this.setState( {
-          searches: null,
-        });
+        this.props.loadHistory(null);
       }      
     });
   }
@@ -146,23 +130,23 @@ class App extends Component {
     let appView = null;
 
     // Checking if the user is already logged in.
-    if (this.state.user) {
+    if (this.props.loggedUser) {
      appView =  (
       <div>
-        <button className="logout__button" onClick={this.logoutHandler}>Logout {this.state.user.displayName} ({this.state.user.email}) </button>
+        <button className="logout__button" onClick={this.logoutHandler}>Logout {this.props.loggedUser.displayName} ({this.props.loggedUser.email}) </button>
         <Searchbar 
-          search={this.state.searchKey}
+          search={this.props.currentTerm}
           changeHandler={this.searchbarChangeHandler}
           saveSearchHan={this.saveSearchHandler} />
             
-        <Video video={this.state.selectedVideo} />
+        <Video video={this.props.selectedVideo} />
             
         <SearchResults
-          videos={this.state.returnedVideos}
+          videos={this.props.videoData}
           clickHandler={this.selectVideoHandler} />
 
         <SearchHistory 
-          searches={this.state.searches}
+          searches={this.props.historyData}
           clickHandler={this.clickHistoryHandler} />
 
         <Moment format="YYYY/MM/DD HH:mm:ss">{this.state.currentTime}</Moment>
@@ -182,4 +166,24 @@ class App extends Component {
   }
 }
 
-export default App;
+// Map the dispatching actions on the store
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setUser: (user) => dispatch(actionTypes.setUser(user)),
+    loadHistory: (historyData) => dispatch(actionTypes.loadHistory(historyData)),
+    saveResults: (term, videoData, selectedVideo) => dispatch(actionTypes.saveResults(term, videoData, selectedVideo)),
+  }
+}
+
+// Map the store state to props
+const mapStateToProps = (state) => {
+  return {
+    loggedUser: state.user,
+    historyData: state.searches,
+    currentTerm: state.searchKey,
+    videoData: state.returnedVideos,
+    selectedVideo: state.selectedVideo
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
