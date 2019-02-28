@@ -5,7 +5,7 @@ const searchVideos = (searchTerm, callback) => {
     const params = {
         url: 'https://www.googleapis.com/youtube/v3/search?',
         part: 'snippet',
-        key: 'AIzaSyC_IwPkfqkZwXVFkEfGpC9uBKQQk7PmCPg',
+        key: 'YoutubeAPIKEY',
         maxResult: '6',
     };
 
