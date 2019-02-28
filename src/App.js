@@ -81,7 +81,7 @@ class App extends Component {
 
 
     this.userInputTimeout = setTimeout(() => {
-      if (searchingNow.length < 5) {
+      if (searchingNow.length < 2) {
         console.log("The search term is too short.");
       } else {
         console.log("Looking for:", searchingNow);
@@ -162,7 +162,7 @@ class App extends Component {
             
         
         <div className="container">
-          <h2>Search Results</h2>
+          <h2>Search Results for <i>{this.props.currentTerm}</i></h2>
           <SearchResults
             videos={this.props.videoData}
             clickHandler={this.selectVideoHandler} />
@@ -191,7 +191,7 @@ class App extends Component {
 
         <footer className="footer">
           <div className="container">
-            <p className="text-muted">Made by Jose Avilez for Partner Hero. </p>
+            <p className="text-muted">Made by Jose Avilez for Partner Hero. Please write me at: <a href="mailto:josemavilez@hotmail.com">josemavilez@hotmail.com</a>  </p>
           </div>
         </footer>
       </div>
