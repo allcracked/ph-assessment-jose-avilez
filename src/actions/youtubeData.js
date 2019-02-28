@@ -1,4 +1,4 @@
-import * as actionTypes from './actions/reducerActions';
+import * as actionTypes from './reducerActions';
 
 const initState = {
     searchKey: '',
@@ -6,8 +6,8 @@ const initState = {
     selectedVideo: [],
 }
 
-export default login = (state = initState, action) => {
-    switch (action.type) {
+const youtubeData = (state = initState, payload) => {
+    switch (payload.type) {
         case actionTypes.SAVE_RESULTS:
             let term, videoData, selectedVideo;
 
@@ -36,7 +36,15 @@ export default login = (state = initState, action) => {
                 selectedVideo: selectedVideo
             }
         
-            default:
+        case actionTypes.SELECT_VIDEO:
+            return {
+                ...state,
+                selectedVideo: payload.data.selectedVideo,
+            }
+
+        default:
                 return state;
     }
 }
+
+export default youtubeData;

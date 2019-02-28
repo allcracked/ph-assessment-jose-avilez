@@ -1,18 +1,20 @@
-import * as actionTypes from './actions/reducerActions';
+import * as actionTypes from './reducerActions';
 
 const initState = {
     user: null,
 }
 
-export default login = (state = initState, action) => {
+const login = (state = initState, action) => {
     switch (action.type) {
         case actionTypes.SET_USER:
             return {
                 ...state,
-                user: payload.data.user
+                user: action.data.user
             }
         
         default:
             return state;
     }
 }
+
+export default login;

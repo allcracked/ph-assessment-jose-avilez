@@ -1,18 +1,20 @@
-import * as actionTypes from './actions/reducerActions';
+import * as actionTypes from './reducerActions';
 
 const initState = {
     searches: [],
 }
 
-export default login = (state = initState, action) => {
+const searchHistory = (state = initState, action) => {
     switch (action.type) {
         case actionTypes.LOAD_HISTORY: 
             return {
                 ...state,
-                searches: payload.data.historyData
+                searches: action.data.historyData
             }
         
         default:
             return state;
     }
 }
+
+export default searchHistory;

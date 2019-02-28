@@ -1,6 +1,8 @@
 export const SET_USER = 'SET_USER';
 export const LOAD_HISTORY = 'LOAD_HISTORY';
 export const SAVE_RESULTS = 'SAVE_RESULTS';
+export const SELECT_VIDEO = 'SELECT_VIDEO';
+export const SET_SEARCH_KEY = 'SET_SEARCH_KEY';
 
 export const setUser = (user) => {
     return {
@@ -27,6 +29,24 @@ export const saveResults = (term, videoData, selectedVideo) => {
             term: term,
             videoData: videoData,
             selectedVideo: selectedVideo
+        }
+    }
+}
+
+export const setTheVideo = (selectedVideo) => {
+    return {
+        type: SELECT_VIDEO,
+        data: {
+            selectedVideo: selectedVideo
+        }
+    }
+}
+
+export const setSearchKey = (searchKey) => {
+    return {
+        type: SET_SEARCH_KEY,
+        data: {
+            term: searchKey
         }
     }
 }

@@ -1,14 +1,24 @@
-.search__bar {
-  width: 600px;
-  margin: 10px auto;
-  border: 1px solid black
-}
-
-.video__container {
-  display: inline-block;
-  vertical-align: top;
+.history__result:hover {
+    background-color: #EEE;
 }
 
 .search__result {
-  display: inline-block;
+    cursor: pointer;
 }
+
+.login__button {
+    padding: 15px;
+}
+
+.login__screen {
+    padding-top: 40px;
+}
+
+.footer {
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    padding-top: 20px;
+  }
+  

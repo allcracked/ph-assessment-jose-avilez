@@ -58,7 +58,6 @@ class App extends Component {
 
   defaultSearchData = () => {
     SearchVideos('ReactJS', (videos) => {
-      console.log(videos[0]);
       this.props.saveResults('ReactJS', videos, videos[0]);
     });
   }
@@ -95,7 +94,7 @@ class App extends Component {
   }
 
   selectVideoHandler = (video) => {
-    this.props.saveResults(null, null, video);
+    this.props.selectVideo(video);
   }
 
   saveSearchHandler = (searchKey) => {
@@ -133,35 +132,69 @@ class App extends Component {
     if (this.props.loggedUser) {
      appView =  (
       <div>
-        <button className="logout__button" onClick={this.logoutHandler}>Logout {this.props.loggedUser.displayName} ({this.props.loggedUser.email}) </button>
-        <Searchbar 
-          search={this.props.currentTerm}
-          changeHandler={this.searchbarChangeHandler}
-          saveSearchHan={this.saveSearchHandler} />
-            
-        <Video video={this.props.selectedVideo} />
-            
-        <SearchResults
-          videos={this.props.videoData}
-          clickHandler={this.selectVideoHandler} />
+        
+        <nav className="navbar navbar-default navbar-fixed-top">
+        <div className="container text-center">
+          
+          <ul className="nav navbar-nav navbar-left">
+          <li><button className="logout__button btn" onClick={this.logoutHandler}>Logout {this.props.loggedUser.displayName} ({this.props.loggedUser.email}) </button></li>
+          </ul>
 
-        <SearchHistory 
-          searches={this.props.historyData}
-          clickHandler={this.clickHistoryHandler} />
+          <form className="navbar-form">
+            <Searchbar 
+              search={this.props.currentTerm}
+              changeHandler={this.searchbarChangeHandler}
+              saveSearchHan={this.saveSearchHandler} />
+          </form>
 
-        <Moment format="YYYY/MM/DD HH:mm:ss">{this.state.currentTime}</Moment>
+          <ul className="nav navbar-nav navbar-right">
+          <li><Moment format="YYYY/MM/DD HH:mm:ss">{this.state.currentTime}</Moment></li>
+          </ul>
+          
+        </div>
+        </nav>
+
+        <div className="jumbotron text-center">
+          <div className="container">
+            <Video video={this.props.selectedVideo} />
+          </div>
+        </div>
+            
+        
+        <div className="container">
+          <h2>Search Results</h2>
+          <SearchResults
+            videos={this.props.videoData}
+            clickHandler={this.selectVideoHandler} />
+
+          <hr />
+          <h2>Saved Searches</h2>
+          <SearchHistory 
+            searches={this.props.historyData}
+            clickHandler={this.clickHistoryHandler} />
+        </div>
+
       </div>
       );
     } else {
-      appView = <button className="login__button" onClick={this.signInHandler}>Login</button>
+      appView =  (
+          <div className="container text-center login__screen">
+            <button className="login__button btn btn-danger" onClick={this.signInHandler}>Login with Google</button>
+          </div>
+        )
     }
 
 
     return (
       <div className="App">
         {appView}
+
+        <footer className="footer">
+          <div className="container">
+            <p className="text-muted">Made by Jose Avilez for Partner Hero. </p>
+          </div>
+        </footer>
       </div>
-      
     );
   }
 }
@@ -172,17 +205,18 @@ const mapDispatchToProps = (dispatch) => {
     setUser: (user) => dispatch(actionTypes.setUser(user)),
     loadHistory: (historyData) => dispatch(actionTypes.loadHistory(historyData)),
     saveResults: (term, videoData, selectedVideo) => dispatch(actionTypes.saveResults(term, videoData, selectedVideo)),
+    selectVideo: (selectedVideo) => dispatch(actionTypes.setTheVideo(selectedVideo)),
   }
 }
 
 // Map the store state to props
 const mapStateToProps = (state) => {
   return {
-    loggedUser: state.user,
-    historyData: state.searches,
-    currentTerm: state.searchKey,
-    videoData: state.returnedVideos,
-    selectedVideo: state.selectedVideo
+    loggedUser: state.login.user,
+    historyData: state.searchHistory.searches,
+    currentTerm: state.youtubeData.searchKey,
+    videoData: state.youtubeData.returnedVideos,
+    selectedVideo: state.youtubeData.selectedVideo
   }
 }
 

@@ -1,19 +1,18 @@
 import React from 'react';
 
 const searchResults = (props) => {
-
     const videoList = props.videos.map((video) => {
         return (
-            <li key={video.etag} onClick={() => {props.clickHandler(video)}}>
+            <div key={video.etag} onClick={() => {props.clickHandler(video)}} className="col-sm-4 search__result">
                 <img src={video.snippet.thumbnails.medium.url} alt={video.snippet.title} />
-                <h4>{video.snippet.title}</h4>
+                <h5>{video.snippet.title}</h5>
                 <p>By: {video.snippet.channelTitle}</p>
-            </li>
+            </div>
         );
     });
 
     return (
-        <div className="search__result">
+        <div className="search__result row">
             {videoList}
         </div>
     );

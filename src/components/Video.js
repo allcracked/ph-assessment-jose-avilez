@@ -11,11 +11,12 @@ const video = (props) => {
 
     return (
         <div className="video__container">
-            <div className="video__player">
+            <div className="video__player embed-responsive embed-responsive-16by9">
                 <iframe 
                     src={videoUrl}
                     title={props.video.snippet.title}
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture">
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                    className="embed-responsive-item">
                 </iframe>
             </div>
             <div className="video__details">
